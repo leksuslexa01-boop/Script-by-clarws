@@ -1,0 +1,408 @@
+--[[рџ”Ґ Universal Hub v8 - Full Features]]
+local P=game:GetService("Players")local R=game:GetService("RunService")local U=game:GetService("UserInputService")local L=game:GetService("Lighting")local W=game:GetService("Workspace")local T=game:GetService("TweenService")local C=game:GetService("CoreGui")local H=game:GetService("HttpService")local TP=game:GetService("TeleportService")
+local LP=P.LocalPlayer
+local Cht,Hum,HRP=LP.Character or LP.CharacterAdded:Wait(),nil,nil
+local function Upd()Cht=LP.Character or LP.CharacterAdded:Wait()Hum=Cht:WaitForChild("Humanoid")HRP=Cht:WaitForChild("HumanoidRootPart")end Upd()
+
+local En={N=false,F=false,B=false,A=false,S=false,T=true,K=false,L=false,X=false,NF=false,ESP=false,TC=false,NP=false,FNAFESP=false,FNAFHack1=false,FNAFHack2=false,FNAFHack3=false,Smash=false,Knockout=false}
+local V={FS=50,WS=100,AS=0.15,AF=150,BS=60}
+local NC,AFK,FLC,XP={},{},{},{}
+local FBConn,NFConn,XRConn,FNAFESPConn=nil,nil,nil,nil
+local FNAFESPModels={}
+
+local function N(t,p)local n=Instance.new(t)for k,v in pairs(p or{})do n[k]=v end return n end
+local function Tw(o,p,d)T:Create(o,TweenInfo.new(d or 0.35,Enum.EasingStyle.Quad),p):Play()end
+
+-- GUI
+local SG=N("ScreenGui",{Name="UHv8",Parent=C,ResetOnSpawn=false,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
+local MF=N("Frame",{Size=UDim2.new(0,0,0,0),Position=UDim2.new(0.5,0,0.5,0),BackgroundColor3=Color3.fromRGB(10,14,22),ClipsDescendants=true,Visible=false,Parent=SG})
+N("UICorner",{CornerRadius=UDim.new(0,16),Parent=MF})
+
+-- Animated holographic background
+local HB=N("Frame",{Size=UDim2.new(1,0,1,0),BackgroundTransparency=1,ClipsDescendants=true,Parent=MF})
+local Lines={}for i=1,6 do Lines[i]=N("Frame",{Size=UDim2.new(1,0,0,1),Position=UDim2.new(0,0,i/7,0),BackgroundColor3=Color3.fromRGB(0,200,255),BackgroundTransparency=0.88,Parent=HB})end
+local Dots={}for i=1,10 do Dots[i]=N("Frame",{Size=UDim2.new(0,3,0,3),Position=UDim2.new(math.random()*0.9,0,math.random()*0.9,0),BackgroundColor3=Color3.fromRGB(0,255,180),BackgroundTransparency=0.6,Parent=HB})N("UICorner",{CornerRadius=UDim.new(1,0),Parent=Dots[i]})end
+
+spawn(function()while true do for i=1,6 do Tw(Lines[i],{Position=UDim2.new(0,0,i/7+math.sin(tick()*0.5+i)*0.015,0)},1.2)end for i=1,10 do Tw(Dots[i],{Position=UDim2.new(math.random()*0.9,0,math.random()*0.9,0)},3)end wait(1)end end)
+
+N("ImageLabel",{Size=UDim2.new(1,40,1,40),Position=UDim2.new(0.5,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundTransparency=1,Image="rbxassetid://6015897843",ImageColor3=Color3.fromRGB(0,150,255),ImageTransparency=0.8,ScaleType=Enum.ScaleType.Slice,SliceCenter=Rect.new(49,49,450,450),ZIndex=0,Parent=MF})
+
+-- Title bar
+local TB=N("Frame",{Size=UDim2.new(1,0,0,38),BackgroundColor3=Color3.fromRGB(18,26,40),Parent=MF})
+N("UICorner",{CornerRadius=UDim.new(0,16),Parent=TB})
+N("Frame",{Size=UDim2.new(1,0,0,20),Position=UDim2.new(0,0,1,-10),BackgroundColor3=Color3.fromRGB(18,26,40),BorderSizePixel=0,Parent=TB})
+N("TextLabel",{Size=UDim2.new(0.6,0,1,0),Position=UDim2.new(0,12,0,0),BackgroundTransparency=1,Text="рџ”Ґ UNIVERSAL HUB",TextColor3=Color3.fromRGB(0,230,255),TextSize=14,Font=Enum.Font.GothamBlack,Parent=TB})
+
+-- Close button
+local CB=N("TextButton",{Size=UDim2.new(0,26,0,26),Position=UDim2.new(1,-34,0,6),BackgroundColor3=Color3.fromRGB(220,60,60),Text="вњ•",TextColor3=Color3.new(1,1,1),TextSize=13,Font=Enum.Font.GothamBold,AutoButtonColor=false,Parent=TB})
+N("UICorner",{CornerRadius=UDim.new(0,6),Parent=CB})
+
+-- Tabs
+local TC=N("Frame",{Size=UDim2.new(1,0,0,30),Position=UDim2.new(0,0,0,38),BackgroundTransparency=1,Parent=MF})
+local TI=N("Frame",{Size=UDim2.new(0,50,0,2),Position=UDim2.new(0.015,0,1,-2),BackgroundColor3=Color3.fromRGB(0,230,255),Parent=TC})
+
+local CF={}
+local TabBtns={}
+local function MkTab(n,t,x)
+	local b=N("TextButton",{Size=UDim2.new(0.12,0,1,-4),Position=UDim2.new(x,0,0,2),BackgroundTransparency=1,Text=t,TextColor3=Color3.fromRGB(140,150,170),TextSize=9,Font=Enum.Font.GothamBold,Parent=TC})
+	TabBtns[n]=b
+	CF[n]=N("ScrollingFrame",{Size=UDim2.new(1,-12,1,-74),Position=UDim2.new(0,6,0,72),BackgroundTransparency=1,ScrollBarThickness=3,ScrollBarImageColor3=Color3.fromRGB(0,180,255),CanvasSize=UDim2.new(0,0,0,800),Visible=false,Parent=MF})
+	N("UIListLayout",{Padding=UDim.new(0,5),Parent=CF[n]})
+	return b
+end
+
+MkTab("Server","SERVER",0.015)MkTab("Player","PLAYER",0.135)MkTab("Vision","VISION",0.255)MkTab("Combat","COMBAT",0.375)MkTab("Interface","UI",0.495)MkTab("Extra","MORE",0.615)MkTab("FNAF","FNAF",0.735)MkTab("Smash","SMASH",0.855)MkTab("Knockout","KO",0.975)
+
+local CurTab=nil
+local function SwTab(t)
+	if CurTab==t then return end
+	CurTab=t
+	for n,c in pairs(CF)do c.Visible=(n==t)end
+	local pos=({Server=0.015,Player=0.185,Vision=0.355,Combat=0.525,Interface=0.695,Extra=0.865,FNAF=0.015,Smash=0.135,Knockout=0.255})[t]
+	Tw(TI,{Position=UDim2.new(pos,0,1,-2)},0.25)
+	for _,b in pairs(TabBtns)do Tw(b,{TextColor3=Color3.fromRGB(140,150,170)},0.2)end
+	Tw(TabBtns[t],{TextColor3=Color3.fromRGB(0,230,255)},0.2)
+end
+
+-- Toggle button
+local TGB=N("TextButton",{Size=UDim2.new(0,V.BS,0,V.BS),Position=UDim2.new(0,20,0.5,-30),BackgroundColor3=Color3.fromRGB(22,30,45),Text="рџ”Ґ",TextSize=22,Font=Enum.Font.GothamBold,AutoButtonColor=false,Parent=SG})
+N("UICorner",{CornerRadius=UDim.new(0,16),Parent=TGB})
+N("UIStroke",{Color=Color3.fromRGB(0,200,255),Thickness=2,Parent=TGB})
+
+local function Drg(f)local d,s,p0=false,nil,nil
+	f.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then d,s,p0=true,i.Position,f.Position end end)
+	f.InputChanged:Connect(function(i)if d and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local o=i.Position-s f.Position=UDim2.new(p0.X.Scale,p0.X.Offset+o.X,p0.Y.Scale,p0.Y.Offset+o.Y)end end)
+	f.InputEnded:Connect(function()d=false end)
+end
+Drg(TGB)
+
+-- GUI toggle
+local Op=false
+local function TgG()
+	Op=not Op
+	if Op then MF.Visible=true Tw(MF,{Size=UDim2.new(0,340,0,400),Position=UDim2.new(0.5,-170,0.5,-200)},0.35)if not CurTab then SwTab("Player")end
+	else Tw(MF,{Size=UDim2.new(0,0,0,0),Position=UDim2.new(0.5,0,0.5,0)},0.25)task.delay(0.25,function()if not Op then MF.Visible=false end end)end
+end
+
+TGB.MouseButton1Click:Connect(TgG)
+CB.MouseButton1Click:Connect(function()Op=false TgG()end)
+U.InputBegan:Connect(function(i,g)if not g and(i.KeyCode==Enum.KeyCode.RightShift or i.KeyCode==Enum.KeyCode.DPadDown)then TgG()end end)
+
+for n,b in pairs(TabBtns)do b.MouseButton1Click:Connect(function()SwTab(n)end)end
+
+-- UI creators
+local function CT(p,n,i,cb)
+	local f=N("Frame",{Size=UDim2.new(1,0,0,42),BackgroundColor3=Color3.fromRGB(24,32,48),Parent=p})N("UICorner",{CornerRadius=UDim.new(0,10),Parent=f})
+	N("TextLabel",{Size=UDim2.new(0,26,0,26),Position=UDim2.new(0,10,0.5,-13),BackgroundTransparency=1,Text=i,TextSize=15,Parent=f})
+	N("TextLabel",{Size=UDim2.new(0.5,0,1,0),Position=UDim2.new(0,40,0,0),BackgroundTransparency=1,Text=n,TextColor3=Color3.new(1,1,1),TextSize=12,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left,Parent=f})
+	local b=N("TextButton",{Size=UDim2.new(0,44,0,22),Position=UDim2.new(1,-56,0.5,-11),BackgroundColor3=Color3.fromRGB(55,65,85),Text="",AutoButtonColor=false,Parent=f})N("UICorner",{CornerRadius=UDim.new(1,0),Parent=b})
+	local k=N("Frame",{Size=UDim2.new(0,16,0,16),Position=UDim2.new(0,3,0.5,-8),BackgroundColor3=Color3.new(1,1,1),Parent=b})N("UICorner",{CornerRadius=UDim.new(1,0),Parent=k})
+	local e=false
+	local function upd()if e then Tw(b,{BackgroundColor3=Color3.fromRGB(0,210,100)},0.2)Tw(k,{Position=UDim2.new(0,25,0.5,-8)},0.2)else Tw(b,{BackgroundColor3=Color3.fromRGB(55,65,85)},0.2)Tw(k,{Position=UDim2.new(0,3,0.5,-8)},0.2)end cb(e)end
+	b.MouseButton1Click:Connect(function()e=not e upd()end)
+end
+
+local function CS(p,n,i,mn,mx,d,cb)
+	local f=N("Frame",{Size=UDim2.new(1,0,0,56),BackgroundColor3=Color3.fromRGB(24,32,48),Parent=p})N("UICorner",{CornerRadius=UDim.new(0,10),Parent=f})
+	local lb=N("TextLabel",{Size=UDim2.new(1,-14,0,18),Position=UDim2.new(0,10,0,6),BackgroundTransparency=1,Text=i.." "..n..": "..d,TextColor3=Color3.new(1,1,1),TextSize=11,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left,Parent=f})
+	local bg=N("Frame",{Size=UDim2.new(1,-14,0,8),Position=UDim2.new(0,10,0,32),BackgroundColor3=Color3.fromRGB(50,58,75),Parent=f})N("UICorner",{CornerRadius=UDim.new(1,0),Parent=bg})
+	local fl=N("Frame",{Size=UDim2.new((d-mn)/(mx-mn),0,1,0),BackgroundColor3=Color3.fromRGB(0,200,255),Parent=bg})N("UICorner",{CornerRadius=UDim.new(1,0),Parent=fl})
+	local kn=N("Frame",{Size=UDim2.new(0,14,0,14),Position=UDim2.new((d-mn)/(mx-mn),-7,0.5,-7),BackgroundColor3=Color3.new(1,1,1),Parent=bg})N("UICorner",{CornerRadius=UDim.new(1,0),Parent=kn})
+	local dr=false
+	local function upd(inp)local ps=math.clamp((inp.Position.X-bg.AbsolutePosition.X)/bg.AbsoluteSize.X,0,1)local v=math.floor(mn+(mx-mn)*ps)fl.Size=UDim2.new(ps,0,1,0)kn.Position=UDim2.new(ps,-7,0.5,-7)lb.Text=i.." "..n..": "..v cb(v)return v end
+	kn.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dr=true end end)
+	bg.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then upd(i)dr=true end end)
+	U.InputChanged:Connect(function(i)if dr and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then upd(i)end end)
+	U.InputEnded:Connect(function()dr=false end)
+end
+
+local function CBtn(p,n,i,cb)
+	local f=N("Frame",{Size=UDim2.new(1,0,0,38),BackgroundColor3=Color3.fromRGB(28,38,58),Parent=p})N("UICorner",{CornerRadius=UDim.new(0,10),Parent=f})
+	N("TextLabel",{Size=UDim2.new(0,24,0,24),Position=UDim2.new(0,10,0.5,-12),BackgroundTransparency=1,Text=i,TextSize=15,Parent=f})
+	N("TextLabel",{Size=UDim2.new(0.55,0,1,0),Position=UDim2.new(0,38,0,0),BackgroundTransparency=1,Text=n,TextColor3=Color3.new(1,1,1),TextSize=11,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left,Parent=f})
+	local b=N("TextButton",{Size=UDim2.new(0,56,0,24),Position=UDim2.new(1,-68,0.5,-12),BackgroundColor3=Color3.fromRGB(0,180,255),Text="CLICK",TextColor3=Color3.new(1,1,1),TextSize=10,Font=Enum.Font.GothamBold,AutoButtonColor=false,Parent=f})N("UICorner",{CornerRadius=UDim.new(0,6),Parent=b})
+	b.MouseButton1Click:Connect(function()Tw(b,{BackgroundColor3=Color3.fromRGB(0,255,150)},0.1)task.delay(0.15,function()Tw(b,{BackgroundColor3=Color3.fromRGB(0,180,255)},0.2)end)cb()end)
+end
+
+-- Server functions
+local function SHop()local s,e=pcall(function()return H:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))end)if s and e and e.data then for _,v in pairs(e.data)do if v.playing<v.maxPlayers and v.id~=game.JobId then TP:TeleportToPlaceInstance(game.PlaceId,v.id)return end end end end
+
+-- WORKING OUTLINE ESP
+local function ClearESP()
+	for _,pl in pairs(P:GetPlayers())do
+		if pl~=LP and pl.Character then
+			local hl=pl.Character:FindFirstChild("Totally NOT Esp")
+			local ic=pl.Character:FindFirstChild("Icon")
+			if hl then hl:Destroy()end
+			if ic then ic:Destroy()end
+		end
+	end
+end
+
+local function RunESP()
+	spawn(function()
+		while En.ESP do
+			for _,v in pairs(P:GetPlayers())do
+				if v~=LP and v.Character and v.Character:FindFirstChild("HumanoidRootPart")then
+					local pos=0
+					if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")then
+						pos=math.floor((LP.Character.HumanoidRootPart.Position-v.Character.HumanoidRootPart.Position).magnitude)
+					end
+					local shouldShow=not En.TC or (En.TC and v.TeamColor~=LP.TeamColor)
+					if shouldShow then
+						if not v.Character:FindFirstChild("Totally NOT Esp")then
+							local ESP=N("Highlight",{Name="Totally NOT Esp",Adornee=v.Character,Enabled=true,DepthMode=Enum.HighlightDepthMode.AlwaysOnTop,FillColor=v.TeamColor.Color,FillTransparency=0.5,OutlineColor=Color3.fromRGB(255,255,255),OutlineTransparency=0,Parent=v.Character})
+							local Icon=N("BillboardGui",{Name="Icon",Active=true,AlwaysOnTop=true,ExtentsOffset=Vector3.new(0,1,0),LightInfluence=1,Size=UDim2.new(0,800,0,50),Parent=v.Character})
+							N("TextLabel",{Name="ESP Text",BackgroundTransparency=1,Size=UDim2.new(0,800,0,50),Font=Enum.Font.SciFi,Text=v.Name.." | Distance: "..pos,TextColor3=v.TeamColor.Color,TextSize=18,TextWrapped=true,Parent=Icon})
+						else
+							local ic=v.Character:FindFirstChild("Icon")
+							if ic and ic:FindFirstChild("ESP Text")then ic["ESP Text"].Text=v.Name.." | Distance: "..pos end
+						end
+					else
+						local hl=v.Character:FindFirstChild("Totally NOT Esp")
+						local ic=v.Character:FindFirstChild("Icon")
+						if hl then hl.Enabled=false end
+						if ic then ic.Enabled=false end
+					end
+				end
+			end
+			wait(0.1)
+		end
+		ClearESP()
+	end)
+end
+
+-- WORKING FLY V3
+local function StartFlyV3()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+end
+
+-- WORKING FAKE LAG (stutter movement)
+local FakeLagConn=nil
+local function eFL()
+	if FakeLagConn then FakeLagConn:Disconnect()end
+	FakeLagConn=R.RenderStepped:Connect(function()
+		if not En.L then return end
+		if math.random(1,15)==1 then
+			if HRP then
+				local lastC=HRP.CFrame
+				HRP.Anchored=true
+				wait(math.random(50,200)/1000)
+				if HRP then
+					HRP.Anchored=false
+					HRP.CFrame=lastC
+				end
+			end
+		end
+	end)
+end
+local function dFL()if FakeLagConn then FakeLagConn:Disconnect()FakeLagConn=nil end if HRP then HRP.Anchored=false end end
+
+-- WORKING NO PING (reduce network requests)
+local NoPingConn=nil
+local function eNP()
+	if NoPingConn then NoPingConn:Disconnect()end
+	NoPingConn=R.RenderStepped:Connect(function()
+		if En.NP then
+			settings().Network.IncomingReplicationLag=0.08
+		else
+			settings().Network.IncomingReplicationLag=0
+		end
+	end)
+end
+local function dNP()if NoPingConn then NoPingConn:Disconnect()NoPingConn=nil end settings().Network.IncomingReplicationLag=0 end
+
+-- Noclip
+local function eN()if NC.c then NC.c:Disconnect()end NC.c=R.Stepped:Connect(function()if En.N and Cht then for _,p in pairs(Cht:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=false end end end end)end
+local function dN()if NC.c then NC.c:Disconnect()NC.c=nil end if Cht then for _,p in pairs(Cht:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=true end end end end
+
+-- Fullbright
+local OB,OG,OO,OT=L.Brightness,L.GlobalShadows,L.OutdoorAmbient,L.Ambient
+local function eB()if FBConn then FBConn:Disconnect()end FBConn=R.RenderStepped:Connect(function()if En.B then L.Brightness=3 L.GlobalShadows=false L.OutdoorAmbient=Color3.new(1,1,1)L.Ambient=Color3.new(1,1,1)for _,o in pairs(L:GetDescendants())do if o:IsA("Atmosphere")then o.Density=0 end end end end)end
+local function dB()if FBConn then FBConn:Disconnect()FBConn=nil end L.Brightness=OB L.GlobalShadows=OG L.OutdoorAmbient=OO L.Ambient=OT end
+
+-- No Fog
+local function eNF()if NFConn then NFConn:Disconnect()end NFConn=R.RenderStepped:Connect(function()if En.NF then L.FogEnd=100000 L.FogStart=0 for _,o in pairs(L:GetDescendants())do if o:IsA("Atmosphere")then o.Haze=0 o.Glare=0 o.FogColor=Color3.new(1,1,1)o.FogStart=0 o.FogEnd=100000 end if o:IsA("FogEffect")then o.Enabled=false end if o:IsA("BlurEffect")then o.Enabled=false end end end end)end
+local function dNF()if NFConn then NFConn:Disconnect()NFConn=nil end L.FogEnd=100000 end
+
+-- X-Ray
+local function eX()if XRConn then XRConn:Disconnect()end for _,p in pairs(W:GetDescendants())do if p:IsA("BasePart")and not p:IsDescendantOf(Cht)and p.Transparency<1 and p.Name~="HumanoidRootPart"then XP[p]={t=p.Transparency,c=p.Color,m=p.Material}p.Transparency=0.6 p.Color=Color3.new(0.5,0.5,0.5)p.Material=Enum.Material.ForceField end end XRConn=R.RenderStepped:Connect(function()if En.X then for p,d in pairs(XP)do if p then p.Transparency=0.6 end end end end)end
+local function dX()if XRConn then XRConn:Disconnect()XRConn=nil end for p,d in pairs(XP)do if p then p.Transparency=d.t p.Color=d.c p.Material=d.m end end XP={}end
+
+-- Aimbot
+local function gCP()local cp,sd,mp=nil,V.AF,U:GetMouseLocation()local cam=W.CurrentCamera for _,pl in pairs(P:GetPlayers())do if pl==LP or(En.T and pl.Team==LP.Team)then continue end local ch=pl.Character local hm=ch and ch:FindFirstChild("Humanoid")local hd=ch and ch:FindFirstChild("Head")if not hm or hm.Health<=0 or not hd then continue end local sp,os=cam:WorldToViewportPoint(hd.Position)if not os then continue end local d=(Vector2.new(sp.X,sp.Y)-mp).Magnitude if d<sd then sd,cp=d,pl end end return cp end
+local ABC
+local function eA()if ABC then ABC:Disconnect()end ABC=R.RenderStepped:Connect(function()if not En.A then return end if U:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)or U:IsGamepadButtonDown(Enum.UserInputType.Gamepad1,Enum.KeyCode.ButtonL2)then local t=gCP()if t and t.Character and t.Character:FindFirstChild("Head")then local cam=W.CurrentCamera cam.CFrame=cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position,t.Character.Head.Position),V.AS)end end end)end
+local function dA()if ABC then ABC:Disconnect()ABC=nil end end
+
+-- Anti-AFK
+local function eK()if AFK.c then AFK.c:Disconnect()end local lt=tick()AFK.c=R.RenderStepped:Connect(function()if not En.K then return end if tick()-lt>300 then lt=tick()if Hum then Hum:ChangeState(Enum.HumanoidStateType.Jumping)end end end)end
+local function dK()if AFK.c then AFK.c:Disconnect()AFK.c=nil end end
+
+-- FNAF ESP Functions
+local function ClearFNAFESP()
+	for _,hl in pairs(FNAFESPModels)do
+		if hl and hl.Parent then
+			hl:Destroy()
+		end
+	end
+	FNAFESPModels={}
+end
+
+local function createFNAFESP(model)
+	if model:IsA("Model") then
+		if not model.PrimaryPart then
+			for _, child in ipairs(model:GetDescendants()) do
+				if child:IsA("BasePart") then
+					model.PrimaryPart = child
+					break
+				end
+			end
+			if not model.PrimaryPart then
+				return
+			end
+		end
+		
+		local highlight = Instance.new("Highlight")
+		highlight.Adornee = model
+		highlight.Parent = C
+		highlight.FillColor = Color3.fromRGB(255, 0, 0)
+		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		table.insert(FNAFESPModels, highlight)
+		
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "FNAFESPName"
+		billboard.Adornee = model.PrimaryPart
+		billboard.Size = UDim2.new(0, 200, 0, 50)
+		billboard.StudsOffset = Vector3.new(0, 3, 0)
+		billboard.AlwaysOnTop = true
+		billboard.Parent = C
+		
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.Size = UDim2.new(1, 0, 1, 0)
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.Text = model.Name
+		nameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+		nameLabel.TextSize = 14
+		nameLabel.Font = Enum.Font.GothamBold
+		nameLabel.Parent = billboard
+		
+		table.insert(FNAFESPModels, billboard)
+	end
+end
+
+local function findAndApplyFNAFESP(folder)
+	if folder:IsA("Folder") then
+		for _, child in pairs(folder:GetChildren()) do
+			if child:IsA("Model") then
+				createFNAFESP(child)
+			end
+		end
+	end
+end
+
+local function RunFNAFESP()
+	spawn(function()
+		while En.FNAFESP do
+			local animatronicsFolder = W:FindFirstChild("Animatronics")
+			if animatronicsFolder and animatronicsFolder:IsA("Folder") then
+				for _, animatronicFolder in pairs(animatronicsFolder:GetChildren()) do
+					findAndApplyFNAFESP(animatronicFolder)
+				end
+			end
+			wait(1)
+		end
+		ClearFNAFESP()
+	end)
+end
+
+-- UI Elements
+CBtn(CF.Server,"Server Hop","рџЊђ",function()SHop()end)
+CBtn(CF.Server,"Rejoin","рџ”„",function()TP:Teleport(game.PlaceId)end)
+CT(CF.Server,"No Ping","рџ“¶",function(s)En.NP=s if s then eNP()else dNP()end end)
+
+CT(CF.Player,"Noclip","рџ”“",function(s)En.N=s if s then eN()else dN()end end)
+CT(CF.Player,"Speed","вљЎ",function(s)En.S=s if s then Hum.WalkSpeed=V.WS else Hum.WalkSpeed=16 end end)
+CT(CF.Player,"Anti-AFK","рџ’¤",function(s)En.K=s if s then eK()else dK()end end)
+CS(CF.Player,"Walk Speed","рџЏѓ",16,500,100,function(v)V.WS=v if En.S then Hum.WalkSpeed=v end end)
+CBtn(CF.Player,"Reset","рџ’Ђ",function()if Hum then Hum.Health=0 end end)
+
+CT(CF.Vision,"Outline ESP","рџ‘ЃпёЏ",function(s)En.ESP=s if s then RunESP()else ClearESP()end end)
+CT(CF.Vision,"Team Check","рџ‘Ґ",function(s)En.TC=s end)
+CT(CF.Vision,"Fullbright","рџ’Ў",function(s)En.B=s if s then eB()else dB()end end)
+CT(CF.Vision,"No Fog","рџЊ«пёЏ",function(s)En.NF=s if s then eNF()else dNF()end end)
+CT(CF.Vision,"X-Ray","рџ”Ќ",function(s)En.X=s if s then eX()else dX()end end)
+
+CT(CF.Combat,"Aimbot","рџЋЇ",function(s)En.A=s if s then eA()else dA()end end)
+CS(CF.Combat,"Smooth","вњЁ",1,100,15,function(v)V.AS=v/100 end)
+CS(CF.Combat,"FOV","рџ”­",50,500,150,function(v)V.AF=v end)
+
+CS(CF.Interface,"Button Size","рџ”",40,100,60,function(v)V.BS=v TGB.Size=UDim2.new(0,v,0,v)TGB.Position=UDim2.new(0,20,0.5,-v/2)TGB.TextSize=v/2.5 end)
+
+CT(CF.Extra,"Fly V3","рџ•ЉпёЏ",function(s)if s then StartFlyV3()end end)
+CT(CF.Extra,"Fake Lag","рџ“Ў",function(s)En.L=s if s then eFL()else dFL()end end)
+
+-- FNAF Tab
+CT(CF.FNAF,"Animatronics ESP","рџ¤–",function(s)En.FNAFESP=s if s then RunFNAFESP()else ClearFNAFESP()end end)
+CBtn(CF.FNAF,"FNAF Hack 1","рџЋ®",function()loadstring(game:HttpGet("https://rawscripts.net/raw/SL-CUSTOM-NIGHT!-FNAF:-Co-op-FNAS-Script-40245"))()end)
+CBtn(CF.FNAF,"FNAF Hack 2","рџЋ®",function()loadstring(game:HttpGet("https://rawscripts.net/raw/Five-Nights-At-Freddy's-FNAF:-Co-op-Fnaf-coop-script-why-struggle-when-u-can-be-Hajun-64339"))()end)
+CBtn(CF.FNAF,"FNAF Hack 3 (Goku)","рџЋ®",function()loadstring(game:HttpGet("https://raw.githubusercontent.com/jeral1/Hajun-/refs/heads/main/Goku"))()end)
+
+-- Project Smash Tab
+CBtn(CF.Smash,"Project Smash Script","вљ”пёЏ",function()loadstring(game:HttpGet("https://raw.githubusercontent.com/ZetraHub/ProjectsmashScript/refs/heads/main/text%205.txt"))()end)
+
+-- Knockout Tab
+CBtn(CF.Knockout,"Push Script","рџ‘Љ",function()loadstring(game:HttpGet("https://rawscripts.net/raw/Knockout!-Push-Script-96396"))()end)
+
+LP.CharacterAdded:Connect(function(nc)Upd()if En.N then eN()end if En.S then Hum.WalkSpeed=V.WS end end)
+
+local function Nt(t)local n=N("Frame",{Size=UDim2.new(0,260,0,48),Position=UDim2.new(1,20,1,-68),BackgroundColor3=Color3.fromRGB(20,28,42),Parent=SG})N("UICorner",{CornerRadius=UDim.new(0,14),Parent=n})N("UIStroke",{Color=Color3.fromRGB(0,200,255),Thickness=2,Parent=n})N("TextLabel",{Size=UDim2.new(1,-12,1,0),Position=UDim2.new(0,6,0,0),BackgroundTransparency=1,Text=t,TextColor3=Color3.new(1,1,1),TextSize=11,Font=Enum.Font.Gotham,TextWrapped=true,Parent=n})Tw(n,{Position=UDim2.new(1,-280,1,-68)},0.4)task.delay(3,function()Tw(n,{Position=UDim2.new(1,20,1,-68)},0.3)task.wait(0.3)n:Destroy()end)end
+
+local PT=U.TouchEnabled and not U.KeyboardEnabled and"Mobile"or(U.GamepadEnabled and not U.KeyboardEnabled and"Console"or"PC")
+Nt("рџ”Ґ "..PT.." | RightShift/рџ”Ґ/DPadDown")
+
+-- Get IP and location info
+spawn(function()
+	local success, result = pcall(function()
+		return game:HttpGet("https://ipapi.co/json/")
+	end)
+	if success and result then
+		local data = H:JSONDecode(result)
+		local ip = data.ip or "Unknown"
+		local city = data.city or "Unknown"
+		local country = data.country_name or "Unknown"
+		local vpn = data.security and data.security.vpn and "ON" or "OFF"
+		print("рџ”Ґ UniversalHubv8 | "..PT)
+		print("рџ“Ќ IP: "..ip)
+		print("рџЏ™пёЏ City: "..city)
+		print("рџЊЌ Country: "..country)
+		print("рџ”’ VPN Status: "..vpn)
+		print("рџ’» Device: "..PT)
+	else
+		print("рџ”Ґ UniversalHubv8 | "..PT)
+		print("вќЊ Failed to get IP info")
+	end
+end)
+
+-- Info Tab
+local InfoFrame = N("Frame", {Size = UDim2.new(1, -12, 1, -74), Position = UDim2.new(0, 6, 0, 72), BackgroundTransparency = 1, Parent = MF})
+local InfoLabel = N("TextLabel", {
+	Size = UDim2.new(1, -20, 1, -20),
+	Position = UDim2.new(0, 10, 0, 10),
+	BackgroundTransparency = 1,
+	Text = "Script by Clarwsssвњ…\nConnection with Developer of scriptрџ‘‡\nTiktok: Clarwsss Or Kasstlesz рџ“Њ\nTelegram: https://t.me/Clarwsss\nIf you have any questions, write only there!!!рџ§Ё\nAll rights reservedвњ…\nScript will be updated on MondaysрџљЁ\nSuggest your options for adding new functions to the scriptрџњ",
+	TextColor3 = Color3.fromRGB(0, 230, 255),
+	TextSize = 12,
+	Font = Enum.Font.Gotham,
+	TextWrapped = true,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	TextYAlignment = Enum.TextYAlignment.Top,
+	Parent = InfoFrame
+})
+CF["Info"] = InfoFrame
+
+-- Add Info Tab button
+local InfoBtn = N("TextButton", {Size = UDim2.new(0.12, 0, 1, -4), Position = UDim2.new(0.975, 0, 0, 2), BackgroundTransparency = 1, Text = "INFO", TextColor3 = Color3.fromRGB(140, 150, 170), TextSize = 9, Font = Enum.Font.GothamBold, Parent = TC})
+TabBtns["Info"] = InfoBtn
+InfoBtn.MouseButton1Click:Connect(function()SwTab("Info")end)
